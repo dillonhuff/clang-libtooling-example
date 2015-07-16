@@ -1,8 +1,10 @@
-#include "clang/Driver/Options.h"
 #include "clang/AST/AST.h"
 #include "clang/AST/ASTContext.h"
 #include "clang/AST/ASTConsumer.h"
 #include "clang/AST/RecursiveASTVisitor.h"
+#include "clang/ASTMatchers/ASTMatchers.h"
+#include "clang/ASTMatchers/ASTMatchFinder.h"
+#include "clang/Driver/Options.h"
 #include "clang/Frontend/ASTConsumers.h"
 #include "clang/Frontend/FrontendActions.h"
 #include "clang/Frontend/CompilerInstance.h"
@@ -12,26 +14,34 @@
 
 using namespace std;
 using namespace clang;
+using namespace clang::ast_matchers;
 using namespace clang::driver;
 using namespace clang::tooling;
 using namespace llvm;
 
-Rewriter rewriter;
-int numFunctions = 0;
-
 static cl::OptionCategory MyToolCategory("My tool options");
 
+StatementMatcher LoopMatcher =
+  forStmt(hasLoopInit(declStmt(hasSingleDecl(varDecl(hasInitializer(integerLiteral(equals(0)))))))).bind("forLoop");
+
+class LoopPrinter : public MatchFinder::MatchCallback {
+public:
+  virtual void run(const MatchFinder::MatchResult &Result) {
+    if (const ForStmt *FS = Result.Nodes.getNodeAs<clang::ForStmt>("forLoop")) {
+      FS->dump();
+    }
+  }
+};
+
 int main(int argc, const char **argv) {
-  // parse the command-line args passed to your code
   CommonOptionsParser op(argc, argv, MyToolCategory);
-  // create a new Clang Tool instance (a LibTooling environment)
   ClangTool Tool(op.getCompilations(), op.getSourcePathList());
 
-  // run the Clang Tool, creating a new FrontendAction (explained below)
-  int result = Tool.run(newFrontendActionFactory<clang::SyntaxOnlyAction>().get());
+  LoopPrinter Printer;
+  MatchFinder Finder;
+  Finder.addMatcher(LoopMatcher, &Printer);
 
-  errs() << "\nFound " << numFunctions << " functions.\n\n";
-  // print out the rewritten source code ("rewriter" is a global var.)
-  //  rewriter.getEditBuffer(rewriter.getSourceMgr().getMainFileID()).write(errs());
+  int result = Tool.run(newFrontendActionFactory(&Finder).get());
+
   return result;
 }
