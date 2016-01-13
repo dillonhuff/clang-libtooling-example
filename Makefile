@@ -3,7 +3,7 @@
 # directories of LLVM, Clang in tools/clang/, etc.
 # Alternatively, if you're building vs. a binary download of LLVM, then
 # LLVM_SRC_PATH can point to the main untarred directory.
-LLVM_SRC_PATH :=/Users/dillon/cppWorkspace/llvm
+LLVM_SRC_PATH :=/Users/dillon/CppWorkspace/llvm
 
 # LLVM_BUILD_PATH is the directory in which you built LLVM - where you ran
 # configure or cmake.
@@ -13,7 +13,7 @@ LLVM_SRC_PATH :=/Users/dillon/cppWorkspace/llvm
 # reflects a debug build with autotools (configure & make), and needs to be
 # changed when a Ninja build is used (see below for example). For linking vs. a
 # binary build of LLVM, point it to the bin/ directory.
-LLVM_BUILD_PATH := /Users/dillon/cppWorkspace/build-llvm
+LLVM_BUILD_PATH := /Users/dillon/CppWorkspace/build
 LLVM_BIN_PATH := $(LLVM_BUILD_PATH)/bin
 
 # CXX has to be a fairly modern C++ compiler that supports C++11. gcc 4.8 and
